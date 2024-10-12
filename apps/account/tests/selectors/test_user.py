@@ -8,9 +8,9 @@ User = get_user_model()
 class UserSelectorTests(TestCase):
 
     def setUp(self):
-        User.objects.create_user(email="user1@example.com", password="TestPassword123")
-        User.objects.create_user(email="user2@example.com", password="TestPassword123")
-        User.objects.create_user(email="user3@example.com", password="TestPassword123")
+        User.objects.create_user(username="user1User", password="TestPassword123")
+        User.objects.create_user(username="user2User", password="TestPassword123")
+        User.objects.create_user(username="user3User", password="TestPassword123")
 
     def test_count_users(self):
         expected_count = 3
