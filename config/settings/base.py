@@ -33,6 +33,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "apps.account.apps.AccountConfig",
     "apps.api.apps.ApiConfig",
+    "apps.connect.apps.ConnectConfig",
 ]
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -49,9 +50,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    
     "corsheaders.middleware.CorsMiddleware",
-    
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -129,8 +128,8 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # STORAGES = {
 #     "default": {
@@ -147,12 +146,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CACHES = {
-    
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
         "LOCATION": "/var/tmp/django_cache",
     }
-    
 }
 
 LOGGING_LEVEL = "DEBUG" if DEBUG else "INFO"
@@ -218,8 +215,3 @@ from .other.drf import *
 from .other.cors import *
 from .other.spectacular import *
 from .other.jwt import *
-
-
-
-
-
