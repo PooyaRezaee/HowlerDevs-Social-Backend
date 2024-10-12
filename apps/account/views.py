@@ -13,7 +13,7 @@ from .validators import validate_password
 
 class RegisterAPIView(APIView):
     class InputRegisterSerializer(serializers.Serializer):
-        email = serializers.EmailField(max_length=256)
+        username = serializers.CharField(max_length=150)
         password = serializers.CharField(
             validators=[validate_password]
         )
@@ -21,7 +21,7 @@ class RegisterAPIView(APIView):
     class OutPutRegisterSerializer(serializers.ModelSerializer):
         class Meta:
             model = User
-            fields = ("email", "joined_at")
+            fields = ("username", "joined_at")
 
     @extend_schema(
         request=InputRegisterSerializer,
@@ -32,9 +32,9 @@ class RegisterAPIView(APIView):
         srz.is_valid(raise_exception=True)
 
         try:
-            email = srz.data["email"]
+            username = srz.data["username"]
             password = srz.data["password"]
-            user = create_user(email, password)
+            user = create_user(username, password)
             return Response(
                 self.OutPutRegisterSerializer(
                     user,
