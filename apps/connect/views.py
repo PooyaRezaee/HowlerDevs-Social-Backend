@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers, status
 from drf_spectacular.utils import extend_schema, OpenApiExample
+from core.output_serializers import SuccessResponseSerializer, ErrorResponseSerializer
 from core import logger
 from apps.account.models import User
 from .services.connection import (
@@ -11,6 +12,13 @@ from .services.connection import (
     reject_connection,
     accept_connection,
 )
+from .selectors.connection import (
+    list_connection_user_received_request,
+    list_connection_user_sent_request,
+    list_connections,
+    user_connected_to,
+)
+from .models import Connection
 
 
 class ConnectToUserAPIView(APIView):
@@ -21,17 +29,11 @@ class ConnectToUserAPIView(APIView):
     class InputReqConnectionSerializer(serializers.Serializer):
         username = serializers.CharField(max_length=150)
 
-    class SuccessResponseReqConSerializer(serializers.Serializer):
-        status = serializers.CharField(max_length=10)
-
-    class ErrorResponseReqConSerializer(serializers.Serializer):
-        detail = serializers.CharField(max_length=255)
-
     @extend_schema(
         request=InputReqConnectionSerializer,
         responses={
-            200: SuccessResponseReqConSerializer,
-            400: ErrorResponseReqConSerializer,
+            200: SuccessResponseSerializer,
+            400: ErrorResponseSerializer,
         },
         examples=[
             OpenApiExample(
@@ -81,17 +83,11 @@ class AcceptConnectionAPIView(APIView):
     class InputAcpConnectionSerializer(serializers.Serializer):
         username = serializers.CharField(max_length=150)
 
-    class SuccessResponseAcpConSerializer(serializers.Serializer):
-        status = serializers.CharField(max_length=10)
-
-    class ErrorResponseAcpConSerializer(serializers.Serializer):
-        detail = serializers.CharField(max_length=255)
-
     @extend_schema(
         request=InputAcpConnectionSerializer,
         responses={
-            200: SuccessResponseAcpConSerializer,
-            400: ErrorResponseAcpConSerializer,
+            200: SuccessResponseSerializer,
+            400: ErrorResponseSerializer,
         },
         examples=[
             OpenApiExample(
@@ -133,17 +129,11 @@ class RejectConnectionAPIView(APIView):
     class InputRejConnectionSerializer(serializers.Serializer):
         username = serializers.CharField(max_length=150)
 
-    class SuccessResponseRejConSerializer(serializers.Serializer):
-        status = serializers.CharField(max_length=10)
-
-    class ErrorResponseRejConSerializer(serializers.Serializer):
-        detail = serializers.CharField(max_length=255)
-
     @extend_schema(
         request=InputRejConnectionSerializer,
         responses={
-            200: SuccessResponseRejConSerializer,
-            400: ErrorResponseRejConSerializer,
+            200: SuccessResponseSerializer,
+            400: ErrorResponseSerializer,
         },
         examples=[
             OpenApiExample(
@@ -177,3 +167,99 @@ class RejectConnectionAPIView(APIView):
             return Response(
                 {"detail": "User does not exists."}, status=status.HTTP_400_BAD_REQUEST
             )
+
+
+"""TODO Control permisions """
+
+
+class ConnectionListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    class ConnectionsInputSerializer(serializers.Serializer):
+        username = serializers.CharField()
+
+    class ConnectionsOutPutSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields = ("username", "picture")
+
+    @extend_schema(
+        request=ConnectionsInputSerializer,
+        responses={
+            200: ConnectionsOutPutSerializer,
+            400: ErrorResponseSerializer,
+            403: ErrorResponseSerializer,
+        },
+    )
+    def post(self, request):
+        input_srz = self.ConnectionsInputSerializer(data=request.data)
+        input_srz.is_valid(raise_exception=True)
+
+        try:
+            user = User.objects.get(username=input_srz.data["username"])
+            self_user = self.request.user
+            if (
+                user.is_private
+                and not user_connected_to(user, self_user)
+                and user != self_user
+            ):
+                return Response(
+                    {"detail": "you must be connection this user to see"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            users = list_connections(user)
+            srz = self.ConnectionsOutPutSerializer(users, many=True)
+            # TODO need pagination
+            return Response(srz.data)
+        except ObjectDoesNotExist:
+            return Response(
+                {"detail": "username not found"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class RequestConnectionListReceivedAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    class ReceivedConnectionsOutPutSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields = ("username", "picture")
+
+    @extend_schema(
+        responses={
+            200: ReceivedConnectionsOutPutSerializer,
+            400: ErrorResponseSerializer,
+        },
+    )
+    def post(self, request):
+        user = request.user
+        connections = list_connection_user_received_request(user)
+        srz = self.ReceivedConnectionsOutPutSerializer(
+            [connection.requester for connection in connections], many=True
+        )
+        # TODO need pagination
+        return Response(srz.data)
+
+
+class RequestConnectionListSentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    class SentConnectionsOutPutSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = User
+            fields = ("username", "picture")
+
+    @extend_schema(
+        responses={
+            200: SentConnectionsOutPutSerializer,
+            400: ErrorResponseSerializer,
+        },
+    )
+    def post(self, request):
+        user = request.user
+        connections = list_connection_user_sent_request(user)
+        srz = self.SentConnectionsOutPutSerializer(
+            [connection.receiver for connection in connections], many=True
+        )
+        # TODO need pagination
+        return Response(srz.data)

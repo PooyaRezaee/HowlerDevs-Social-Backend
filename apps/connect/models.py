@@ -20,7 +20,7 @@ class Connection(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return f"{self.requester} To {self.reciver} | {self.is_accept}"
+        return f"{self.requester} To {self.receiver} | {self.is_accept}"
 
     objects = ConnectionManager()
 
