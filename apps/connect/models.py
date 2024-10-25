@@ -16,7 +16,7 @@ class Connection(models.Model):
     receiver = models.ForeignKey(
         "account.User", on_delete=models.CASCADE, related_name="connect_recive"
     )
-    is_accept = models.BooleanField()
+    is_accept = models.BooleanField(db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:

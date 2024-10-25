@@ -42,12 +42,13 @@ class User(AbstractBaseUser, PermissionsMixin):
             "unique": "A user with that username already exists.",
         },
         unique=True,
+        db_index=True,
     )
     full_name = models.CharField(max_length=64,null=True)
     bio = models.CharField(max_length=512,null=True,blank=True)
-    is_private = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    is_admin = models.BooleanField(default=False)
+    is_private = models.BooleanField(default=False,db_index=True )
+    is_active = models.BooleanField(default=True,db_index=True  )
+    is_admin = models.BooleanField(default=False,db_index=True)
     joined_at = models.DateTimeField("date joined", auto_now_add=True)
     picture = models.ImageField("Image Profile",upload_to="img/profile",null=True,blank=True)
 
