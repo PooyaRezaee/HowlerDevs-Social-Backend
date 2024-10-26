@@ -12,14 +12,11 @@ def create_post(owner: User, description: str, thumbnail=None) -> Post:
     return post
 
 
-def update_post(post: Post, description: str = None, thumbnail=None) -> Post:
+def update_post(post: Post, description: str = None) -> Post:
     if description:
         unlink_hashtags_from_content(post)
         post.description = description
         link_hashtags_to_content(post)
-
-    if thumbnail:
-        post.thumbnail = thumbnail
 
     post.save()
     return post
@@ -44,20 +41,11 @@ def create_reel(
     return reel
 
 
-def update_reel(
-    reel: Reel, description: str = None, video=None, sound=None, thumbnail=None
-) -> Reel:
+def update_reel(reel: Reel, description: str) -> Reel:
     if description:
         unlink_hashtags_from_content(reel)
         reel.description = description
         link_hashtags_to_content(reel)
-
-    if video or sound:
-        reel.video = video
-        reel.sound = sound
-
-    if thumbnail:
-        reel.thumbnail = thumbnail
 
     reel.save()
     return reel
