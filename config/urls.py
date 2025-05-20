@@ -27,10 +27,8 @@ from drf_spectacular.views import (
 )
 
 
-
 urlpatterns = [
     path("admin/", admin.site.urls),
-
     # API urls
     path("", include(("apps.api.urls", "api"))),
     # API document
@@ -54,11 +52,8 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-
-
-] 
+]
 
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

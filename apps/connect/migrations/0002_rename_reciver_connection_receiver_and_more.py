@@ -7,18 +7,18 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('connect', '0001_initial'),
+        ("connect", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='connection',
-            old_name='reciver',
-            new_name='receiver',
+            model_name="connection",
+            old_name="reciver",
+            new_name="receiver",
         ),
         migrations.AlterUniqueTogether(
-            name='connection',
-            unique_together={('requester', 'receiver')},
+            name="connection",
+            unique_together={("requester", "receiver")},
         ),
     ]

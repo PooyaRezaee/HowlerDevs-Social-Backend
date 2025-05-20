@@ -6,7 +6,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Post, Reel
-from .selectors.content import get_posts_by_owner, get_reels_by_owner
+from .selectors.content import (
+    get_posts_by_owner,
+    get_reels_by_owner,
+    get_connection_content,
+)
+from .selectors.hashtag import get_reels_by_hashtag, get_posts_by_hashtag
 from .services.content import (
     create_post,
     create_reel,
@@ -114,15 +119,35 @@ class UpdateDeleteContentAPIView(APIView):
 
 
 class SearchContentAPIView(APIView):
-    def post(self, request):
-        pass
+    model = None
+    serializer_class = None
+
+    def get_queryset(self, hashtag_name):
+        if self.model is Post:
+            return get_posts_by_hashtag(hashtag_name)
+        else:
+            return get_reels_by_hashtag(hashtag_name)
+
+    def get(self, request):
+        search_query = self.request.GET.get("q", None)
+        contents = self.get_queryset(search_query)
+
+        if contents:
+            srz = self.serializer_class(contents, many=True)
+            return Response(srz.data)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RecommendContentAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    model = None
+    serializer_class = None
 
     def get(self, request):
-        pass
+        contents = get_connection_content(request.user, self.model)
+        srz = self.serializer_class(contents, many=True)
+        return Response(srz.data)
 
 
 class ExploreAPIView(APIView):

@@ -10,13 +10,10 @@ from .services.user import create_user
 from .validators import validate_password
 
 
-
 class RegisterAPIView(APIView):
     class InputRegisterSerializer(serializers.Serializer):
         username = serializers.CharField(max_length=150)
-        password = serializers.CharField(
-            validators=[validate_password]
-        )
+        password = serializers.CharField(validators=[validate_password])
 
     class OutPutRegisterSerializer(serializers.ModelSerializer):
         class Meta:

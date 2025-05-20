@@ -30,7 +30,7 @@ class Reel(BaseContent):
     video = models.FileField(upload_to="content/video", blank=True, null=True)
     sound = models.FileField(upload_to="content/sound", blank=True, null=True)
 
-    def clean(self): # add validation for sound and video
+    def clean(self):  # add validation for sound and video
         if not self.video and not self.sound:
             raise ValidationError("Either video or sound must be provided.")
         if self.video and self.sound:

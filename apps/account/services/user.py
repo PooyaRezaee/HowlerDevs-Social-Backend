@@ -6,6 +6,7 @@ from ..validators import validate_password
 
 username_validator = UnicodeUsernameValidator()
 
+
 def create_user(username: str, password: str) -> User | None:
     username_validator(username)
     validate_password(password)

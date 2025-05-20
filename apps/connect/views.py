@@ -5,7 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers, status
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from core.output_serializers import SuccessResponseSerializer, ErrorResponseSerializer
-from core import logger
 from apps.account.models import User
 from .services.connection import (
     request_connection,
@@ -18,7 +17,6 @@ from .selectors.connection import (
     list_connections,
     user_connected_to,
 )
-from .models import Connection
 
 
 class ConnectToUserAPIView(APIView):

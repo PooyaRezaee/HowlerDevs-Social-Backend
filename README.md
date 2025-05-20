@@ -1,24 +1,13 @@
-# Run manual
-- config and setup postgresql, redis
-- run web application
-    - ```python manage.py migrate```
-    - ```python manage.py runserver```
-
-
-# Run just Webapplication by Dockerfile
-build dockerfile and start container
-```bash
-docker build . -t "webapplication"
-docker run --name web_application --rm -p 8000:8000 --env-file .env --network host -d webapplication
-```
-
-
-
 # Run Project by Docker
 ```bash
-docker-compose up -d
+# just docker file
+docker build . -t "webapplication"
+docker run --name web_application --env-file .env --network host -d webapplication
+# all services in development
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+# all services in production
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
-
 
 # Useful commands
 #### See std-out web application

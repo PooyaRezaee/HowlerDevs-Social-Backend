@@ -6,27 +6,45 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('content', '0001_initial'),
+        ("content", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='post',
-            name='created_at',
+            model_name="post",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, db_index=True),
         ),
         migrations.AlterField(
-            model_name='reel',
-            name='created_at',
+            model_name="reel",
+            name="created_at",
             field=models.DateTimeField(auto_now_add=True, db_index=True),
         ),
         migrations.CreateModel(
-            name='Hashtag',
+            name="Hashtag",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(db_index=True, max_length=64, unique=True)),
-                ('posts', models.ManyToManyField(blank=True, related_name='hashtags', to='content.post')),
-                ('reels', models.ManyToManyField(blank=True, related_name='hashtags', to='content.reel')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(db_index=True, max_length=64, unique=True)),
+                (
+                    "posts",
+                    models.ManyToManyField(
+                        blank=True, related_name="hashtags", to="content.post"
+                    ),
+                ),
+                (
+                    "reels",
+                    models.ManyToManyField(
+                        blank=True, related_name="hashtags", to="content.reel"
+                    ),
+                ),
             ],
         ),
     ]

@@ -4,8 +4,13 @@ from django.conf import settings
 from django.utils.html import strip_tags
 
 
-def send_template_email(subject: str, template: str, to: list, from_email: str | None = None,
-                        context: dict | None = None):
+def send_template_email(
+    subject: str,
+    template: str,
+    to: list,
+    from_email: str | None = None,
+    context: dict | None = None,
+):
     html_message = render_to_string(template, context=context)
     plain_message = strip_tags(html_message)
 
@@ -23,7 +28,9 @@ def send_template_email(subject: str, template: str, to: list, from_email: str |
     message.send()
 
 
-def simple_send_mail(subject: str, message: str, to: list, from_email: str | None = None):
+def simple_send_mail(
+    subject: str, message: str, to: list, from_email: str | None = None
+):
     if from_email is None:
         from_email = settings.EMAIL_HOST_USER
 

@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class UserSelectorTests(TestCase):
 
     def setUp(self):
@@ -14,5 +15,5 @@ class UserSelectorTests(TestCase):
 
     def test_count_users(self):
         expected_count = 3
-        
+
         self.assertEqual(count_users(), expected_count)

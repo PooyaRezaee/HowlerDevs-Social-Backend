@@ -9,7 +9,9 @@ from ...models import User
 class UserServicesTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user1 = baker.make("account.User", username="user1User") # set manual username because baker insert username without normalize username
+        cls.user1 = baker.make(
+            "account.User", username="user1User"
+        )  # set manual username because baker insert username without normalize username
         cls.user2 = baker.make("account.User")
 
     def test_create_valid_user(self):

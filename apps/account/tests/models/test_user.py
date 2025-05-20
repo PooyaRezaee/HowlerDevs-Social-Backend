@@ -5,16 +5,17 @@ from unittest.mock import patch
 
 User = get_user_model()
 
+
 class UserModelTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = baker.make("account.User")
-        
+
     def test_create_user_with_username_successful(self):
         username = "testUser"
         password = "TestPassword123"
         user = User.objects.create_user(username=username, password=password)
-        
+
         self.assertEqual(user.username, username)
         self.assertTrue(user.check_password(password))
         self.assertTrue(user.is_active)
@@ -32,7 +33,7 @@ class UserModelTests(TestCase):
         username = "superuserUser"
         password = "SuperPassword123"
         user = User.objects.create_superuser(username=username, password=password)
-        
+
         self.assertEqual(user.username, username)
         self.assertTrue(user.check_password(password))
         self.assertTrue(user.is_superuser)

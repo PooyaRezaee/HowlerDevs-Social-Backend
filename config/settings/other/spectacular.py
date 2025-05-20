@@ -21,6 +21,8 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    "PREPROCESSING_HOOKS": ["config.settings.other.spectacular.preprocessing_filter_spec"],
+    "PREPROCESSING_HOOKS": [
+        "config.settings.other.spectacular.preprocessing_filter_spec"
+    ],
     "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
 }

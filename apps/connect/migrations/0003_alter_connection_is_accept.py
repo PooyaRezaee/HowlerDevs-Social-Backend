@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('connect', '0002_rename_reciver_connection_receiver_and_more'),
+        ("connect", "0002_rename_reciver_connection_receiver_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='connection',
-            name='is_accept',
+            model_name="connection",
+            name="is_accept",
             field=models.BooleanField(db_index=True),
         ),
     ]

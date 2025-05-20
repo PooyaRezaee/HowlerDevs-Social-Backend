@@ -1,4 +1,3 @@
-import re
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -14,7 +13,7 @@ class UserManager(BaseUserManager):
 
         if not password:
             raise ValueError("You should enter Password")
-        
+
         user = self.model(username=username, **extra_fields)
 
         user.password = make_password(password)
@@ -28,7 +27,7 @@ class UserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True.")
 
         return self.create_user(username, password, **extra_fields)
-    
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     username_validator = UnicodeUsernameValidator()
@@ -44,14 +43,15 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         db_index=True,
     )
-    full_name = models.CharField(max_length=64,null=True)
-    bio = models.CharField(max_length=512,null=True,blank=True)
-    is_private = models.BooleanField(default=False,db_index=True )
-    is_active = models.BooleanField(default=True,db_index=True  )
-    is_admin = models.BooleanField(default=False,db_index=True)
+    full_name = models.CharField(max_length=64, null=True)
+    bio = models.CharField(max_length=512, null=True, blank=True)
+    is_private = models.BooleanField(default=False, db_index=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    is_admin = models.BooleanField(default=False, db_index=True)
     joined_at = models.DateTimeField("date joined", auto_now_add=True)
-    picture = models.ImageField("Image Profile",upload_to="img/profile",null=True,blank=True)
-
+    picture = models.ImageField(
+        "Image Profile", upload_to="img/profile", null=True, blank=True
+    )
 
     objects = UserManager()
 
@@ -63,7 +63,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
-    
+
     @property
     def is_staff(self):
         return self.is_admin

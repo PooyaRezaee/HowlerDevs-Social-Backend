@@ -15,13 +15,23 @@ class ConnectionServicesTests(TestCase):
         self.user3 = User.objects.create(username="user3")
         self.user4 = User.objects.create(username="user4")
 
-        self.con1 = Connection.objects.create(requester=self.user1,receiver=self.user2,is_accept=True)
-        self.con2 = Connection.objects.create(requester=self.user2,receiver=self.user3,is_accept=True)
+        self.con1 = Connection.objects.create(
+            requester=self.user1, receiver=self.user2, is_accept=True
+        )
+        self.con2 = Connection.objects.create(
+            requester=self.user2, receiver=self.user3, is_accept=True
+        )
 
-        self.con3 = Connection.objects.create(requester=self.user3,receiver=self.user4,is_accept=True)
-        
-        self.con4 = Connection.objects.create(requester=self.user1,receiver=self.user4,is_accept=False)
-        self.con5 = Connection.objects.create(requester=self.user2,receiver=self.user4,is_accept=False)
+        self.con3 = Connection.objects.create(
+            requester=self.user3, receiver=self.user4, is_accept=True
+        )
+
+        self.con4 = Connection.objects.create(
+            requester=self.user1, receiver=self.user4, is_accept=False
+        )
+        self.con5 = Connection.objects.create(
+            requester=self.user2, receiver=self.user4, is_accept=False
+        )
 
     def test_get_list_connection_users(self):
         con_user1 = list_connections(self.user1)

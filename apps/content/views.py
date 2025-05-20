@@ -1,4 +1,9 @@
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+    OpenApiResponse,
+    OpenApiParameter,
+)
 from .models import Post, Reel
 from .base_view import *
 from .serializers import (
@@ -6,15 +11,28 @@ from .serializers import (
     ReelOutPutSerializer,
     PostInputSerializer,
     ReelInputSerializer,
-    ContentUpdateInputSerializer
+    ContentUpdateInputSerializer,
 )
 
+
 # Separate post and reels view
+
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="get user's posts",
+    )
+)
 class UserPostListAPIView(UserContentListAPIView):
     model = Post
     serializer_class = PostOutPutSerializer
 
 
+@extend_schema_view(
+    get=extend_schema(
+        summary="get user's reels",
+    )
+)
 class UserReelListAPIView(UserContentListAPIView):
     model = Reel
     serializer_class = ReelOutPutSerializer
@@ -23,37 +41,42 @@ class UserReelListAPIView(UserContentListAPIView):
 class RecommendPostAPIView(RecommendContentAPIView):
     model = Post
 
+
 @extend_schema_view(
-    summary="create a post",
     post=extend_schema(
+        summary="create a post",
         request=PostInputSerializer,
-        responses={200: PostOutPutSerializer}
-    )
+        responses={200: PostOutPutSerializer},
+    ),
 )
 class CreatePostAPIView(CreateContentAPIView):
     model = Post
     input_serializer_class = PostInputSerializer
     output_serializer_class = PostOutPutSerializer
 
+
 @extend_schema_view(
-    summary="create a reel",
     post=extend_schema(
+        summary="create a reel",
         request=ReelInputSerializer,
-        responses={200: ReelOutPutSerializer}
-    )
+        responses={200: ReelOutPutSerializer},
+    ),
 )
 class CreateReelAPIView(CreateContentAPIView):
     model = Reel
     input_serializer_class = ReelInputSerializer
     output_serializer_class = ReelOutPutSerializer
+
+
 from drf_spectacular.types import OpenApiTypes
+
 
 @extend_schema_view(
     patch=extend_schema(
         summary="update a post",
         description="update a post(just description field). Only the owner can update the post.",
         request=ContentUpdateInputSerializer,
-        responses={200: PostOutPutSerializer}
+        responses={200: PostOutPutSerializer},
     ),
     delete=extend_schema(
         summary="Delete a post",
@@ -61,19 +84,20 @@ from drf_spectacular.types import OpenApiTypes
         responses={
             204: None,
         },
-    )
+    ),
 )
 class UpdateDeletePostAPIView(UpdateDeleteContentAPIView):
     model = Post
     input_serializer_class = ContentUpdateInputSerializer
     output_serializer_class = PostOutPutSerializer
 
+
 @extend_schema_view(
     patch=extend_schema(
         summary="update a reel",
         description="update a reel(just description field). Only the owner can update the reel.",
         request=ContentUpdateInputSerializer,
-        responses={200: ReelOutPutSerializer}
+        responses={200: ReelOutPutSerializer},
     ),
     delete=extend_schema(
         summary="Delete a reel",
@@ -81,7 +105,7 @@ class UpdateDeletePostAPIView(UpdateDeleteContentAPIView):
         responses={
             204: None,
         },
-    )
+    ),
 )
 class UpdateDeleteReelAPIView(UpdateDeleteContentAPIView):
     model = Reel
@@ -89,12 +113,48 @@ class UpdateDeleteReelAPIView(UpdateDeleteContentAPIView):
     output_serializer_class = PostOutPutSerializer
 
 
+@extend_schema_view(
+    get=extend_schema(
+        summary="Search posts by hashtag",
+        description="Retrieve a list of posts that match the specified hashtag",
+        parameters=[
+            OpenApiParameter(
+                "q", description="Hashtag to search for", required=True, type=str
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                response=PostOutPutSerializer, description="List of posts found"
+            ),
+            204: OpenApiResponse(description="No posts found for the provided hashtag"),
+        },
+    )
+)
 class SearchPostsAPIView(SearchContentAPIView):
     model = Post
+    serializer_class = PostOutPutSerializer
 
 
+@extend_schema_view(
+    get=extend_schema(
+        summary="Search reels by hashtag",
+        description="Retrieve a list of reels that match the specified hashtag",
+        parameters=[
+            OpenApiParameter(
+                "q", description="Hashtag to search for", required=True, type=str
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                response=ReelOutPutSerializer, description="List of reels found"
+            ),
+            204: OpenApiResponse(description="No reels found for the provided hashtag"),
+        },
+    )
+)
 class SearchReelsAPIView(SearchContentAPIView):
     model = Reel
+    serializer_class = ReelOutPutSerializer
 
 
 class ExplorePostsAPIView(ExploreAPIView):

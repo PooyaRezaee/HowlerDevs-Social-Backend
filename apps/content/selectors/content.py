@@ -1,4 +1,5 @@
 from apps.account.models import User
+from apps.connect.selectors.connection import list_connections
 from ..models import Post, Reel
 
 
@@ -22,3 +23,10 @@ def get_content_by_owner(username: str) -> dict[str, Post | Reel]:
     posts = Post.objects.filter(owner__username=username)
     reels = Reel.objects.filter(owner__username=username)
     return {"posts": posts, "reels": reels}
+
+
+# TODO create type content
+# TODO get content in argument instead create function for each them (for top functions)
+def get_connection_content(user: User, content: Post | Reel):
+    connected_users = list_connections(user)
+    return content.objects.filter(owner_in=connected_users).order_by("-created_at")
