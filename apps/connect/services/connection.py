@@ -7,6 +7,7 @@ from ..models import Connection
 class ErrorMessages:
     connection_exist = "You are already connected"
     request_connection_exist = "you have already request to user"
+    cannot_connect_to_self = "you can't connect to yourself"
 
 
 def request_connection(
@@ -18,6 +19,8 @@ def request_connection(
     reverse_connection = Connection.objects.filter(
         requester=receiver, receiver=requester
     )
+    if requester.pk == receiver.pk:
+        return False, ErrorMessages.cannot_connect_to_self
 
     if connection.exists():
         if connection.get().is_accept:
@@ -33,7 +36,6 @@ def request_connection(
             obj_reverse_connection.is_accept = True
             obj_reverse_connection.save()
             return True, obj_reverse_connection
-
     try:
         connection = Connection.objects.create(
             requester=requester,

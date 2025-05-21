@@ -26,3 +26,7 @@ docker exec web_application python manage.py migrate
 ```bash
 docker exec -it web_application python manage.py createsuperuser
 ```
+#### Database shell
+```bash
+docker exec -it django-social-db-1 psql -U user -d social
+```

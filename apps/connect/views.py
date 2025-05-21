@@ -216,6 +216,7 @@ class ConnectionListAPIView(APIView):
 
 
 class RequestConnectionListReceivedAPIView(APIView):
+    """Return a list of incoming connection requests waiting for the authenticated user's approval."""
     permission_classes = [IsAuthenticated]
 
     class ReceivedConnectionsOutPutSerializer(serializers.ModelSerializer):
@@ -240,6 +241,7 @@ class RequestConnectionListReceivedAPIView(APIView):
 
 
 class RequestConnectionListSentAPIView(APIView):
+    """Return a list pending connection rqeuests sent by the authenticated user."""
     permission_classes = [IsAuthenticated]
 
     class SentConnectionsOutPutSerializer(serializers.ModelSerializer):
