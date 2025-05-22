@@ -1,4 +1,5 @@
 from apps.account.models import User
+from django.core.exceptions import ValidationError
 from ..models import Post, Reel
 from .hashtag import link_hashtags_to_content, unlink_hashtags_from_content
 
@@ -30,15 +31,18 @@ def delete_post(post: Post) -> None:
 def create_reel(
     owner: User, description: str, video=None, sound=None, thumbnail=None
 ) -> Reel:
-    reel = Reel.objects.create(
-        owner=owner,
-        description=description,
-        video=video,
-        sound=sound,
-        thumbnail=thumbnail,
-    )
-    link_hashtags_to_content(reel)
-    return reel
+    try:
+        reel = Reel.objects.create(
+            owner=owner,
+            description=description,
+            video=video,
+            sound=sound,
+            thumbnail=thumbnail,
+        )
+        link_hashtags_to_content(reel)
+        return True, reel
+    except ValidationError as e:
+        return False, e
 
 
 def update_reel(reel: Reel, description: str) -> Reel:

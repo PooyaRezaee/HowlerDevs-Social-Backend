@@ -37,7 +37,7 @@ class Reel(BaseContent):
             raise ValidationError("Only one of video or sound can be provided.")
 
     def save(self, *args, **kwargs):
-        # self.full_clean() # Need clean in logic
+        self.full_clean() # Need for apply clean logic
         super().save(*args, **kwargs)
 
 

@@ -68,9 +68,6 @@ class CreateReelAPIView(CreateContentAPIView):
     output_serializer_class = ReelOutPutSerializer
 
 
-from drf_spectacular.types import OpenApiTypes
-
-
 @extend_schema_view(
     patch=extend_schema(
         summary="update a post",
@@ -110,7 +107,7 @@ class UpdateDeletePostAPIView(UpdateDeleteContentAPIView):
 class UpdateDeleteReelAPIView(UpdateDeleteContentAPIView):
     model = Reel
     input_serializer_class = ContentUpdateInputSerializer
-    output_serializer_class = PostOutPutSerializer
+    output_serializer_class = ReelOutPutSerializer
 
 
 @extend_schema_view(

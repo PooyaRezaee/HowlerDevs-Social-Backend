@@ -1,5 +1,6 @@
 import re
 from django.db.utils import DataError
+from core import logger
 from ..models import Hashtag, Post, Reel, BaseContent
 
 HASHTAG_PATTERN = r"#(\w+)"
@@ -27,7 +28,11 @@ def link_hashtags_to_content(content_instance: BaseContent):
 def unlink_hashtags_from_content(content_instance: BaseContent):
     hashtags_in_description = extract_hashtags(content_instance.description)
     for hashtag_name in hashtags_in_description:
-        hashtag = Hashtag.objects.filter(name=hashtag_name).first()
+        if not Hashtag.objects.filter(name=hashtag_name).exists():
+            logger.warning(f"Hashtag '{hashtag_name}' detected in description during update but missing from the hashtags table — possible inconsistency.")
+            continue
+
+        hashtag = Hashtag.objects.filter(name=hashtag_name).get()
         if hashtag:
             if isinstance(content_instance, Post):
                 hashtag.posts.remove(content_instance)

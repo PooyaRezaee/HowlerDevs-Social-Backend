@@ -63,13 +63,15 @@ class CreateContentAPIView(APIView):
                 thumbnail=srz_data.get("thumbnail"),
             )
         else:
-            content = create_reel(
+            created, content = create_reel(
                 owner=request.user,
                 description=srz_data["description"],
                 thumbnail=srz_data.get("thumbnail"),
                 video=srz_data.get("video"),
                 sound=srz_data.get("sound"),
             )
+            if not created:
+                return Response({"detail": content}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(self.output_serializer_class(content).data)
 

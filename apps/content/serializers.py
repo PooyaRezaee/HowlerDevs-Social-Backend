@@ -39,13 +39,29 @@ class ContentInputSerializer(serializers.ModelSerializer):
 class PostInputSerializer(ContentInputSerializer):
     class Meta:
         model = Post
-        fields = ("id", "description", "thumbnail")
+        fields = ("description", "thumbnail")
 
 
 class ReelInputSerializer(ContentInputSerializer):
+    """
+    create reels
+    """
     class Meta:
         model = Reel
-        fields = ("description",)
+        fields = ("description", "thumbnail", "video" ,"sound")
+
+    
+    def validate(self, attrs):
+        video = attrs.get("video")
+        sound = attrs.get("sound")
+
+        if video and sound:
+            raise serializers.ValidationError("Only one of video or sound can be provided.")
+
+        if not video and not sound:
+            raise serializers.ValidationError("Either video or sound must be provided.")
+
+        return attrs
 
 
 class ContentUpdateInputSerializer(serializers.Serializer):
