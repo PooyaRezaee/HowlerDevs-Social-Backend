@@ -5,20 +5,20 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import Post, Reel
+from .models import Post, MediaContent, Content
 from .selectors.content import (
     get_posts_by_owner,
-    get_reels_by_owner,
+    get_media_content_by_owner,
+    get_content_by_owner,
     get_connection_content,
 )
-from .selectors.hashtag import get_reels_by_hashtag, get_posts_by_hashtag
+from .selectors.hashtag import get_media_contents_by_hashtag, get_posts_by_hashtag,get_contents_by_hashtag
 from .services.content import (
     create_post,
-    create_reel,
-    update_post,
-    update_reel,
+    create_media_content,
+    update_content,
     delete_post,
-    delete_reel,
+    delete_media_content,
 )
 from .permissions import IsContentOwner
 
@@ -27,8 +27,6 @@ __all__ = [
     "CreateContentAPIView",
     "UpdateDeleteContentAPIView",
     "SearchContentAPIView",
-    "RecommendContentAPIView",
-    "ExploreAPIView",
 ]
 
 
@@ -39,8 +37,10 @@ class UserContentListAPIView(APIView):
     def get(self, request, username):
         if self.model is Post:
             contents = get_posts_by_owner(username)
-        else:
-            contents = get_reels_by_owner(username)
+        elif self.model is MediaContent:
+            contents = get_media_content_by_owner(username)
+        else: # Model is Content
+            contents = get_content_by_owner(username)
 
         srz = self.serializer_class(contents, many=True)
         return Response(srz.data)
@@ -62,13 +62,13 @@ class CreateContentAPIView(APIView):
                 description=srz_data["description"],
                 thumbnail=srz_data.get("thumbnail"),
             )
-        else:
-            created, content = create_reel(
+        else: # model is MediaContent
+            created, content = create_media_content(
                 owner=request.user,
                 description=srz_data["description"],
                 thumbnail=srz_data.get("thumbnail"),
-                video=srz_data.get("video"),
-                sound=srz_data.get("sound"),
+                media_type=srz_data.get("media_type"),
+                file=srz_data.get("file"),
             )
             if not created:
                 return Response({"detail": content}, status=status.HTTP_400_BAD_REQUEST)
@@ -88,16 +88,13 @@ class UpdateDeleteContentAPIView(APIView):
         return obj
 
     def get_update_function(self):
-        if self.model is Post:
-            return update_post
-        else:
-            return update_reel
+        return update_content
 
     def get_delete_function(self):
         if self.model is Post:
             return delete_post
         else:
-            return delete_reel
+            return delete_media_content
 
     def patch(self, request, pk):
         content_obj = self.get_object(pk)
@@ -127,8 +124,10 @@ class SearchContentAPIView(APIView):
     def get_queryset(self, hashtag_name):
         if self.model is Post:
             return get_posts_by_hashtag(hashtag_name)
+        elif self.model is MediaContent:
+            return get_media_contents_by_hashtag(hashtag_name)
         else:
-            return get_reels_by_hashtag(hashtag_name)
+            return get_contents_by_hashtag(hashtag_name)
 
     def get(self, request):
         search_query = self.request.GET.get("q", None)
@@ -141,19 +140,19 @@ class SearchContentAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class RecommendContentAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-    model = None
-    serializer_class = None
+# class RecommendContentAPIView(APIView):
+#     permission_classes = [IsAuthenticated]
+#     model = None
+#     serializer_class = None
 
-    def get(self, request):
-        contents = get_connection_content(request.user, self.model)
-        srz = self.serializer_class(contents, many=True)
-        return Response(srz.data)
+#     def get(self, request):
+#         contents = get_connection_content(request.user, self.model)
+#         srz = self.serializer_class(contents, many=True)
+#         return Response(srz.data)
 
 
-class ExploreAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+# class ExploreAPIView(APIView):
+#     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        pass
+#     def get(self, request):
+#         pass

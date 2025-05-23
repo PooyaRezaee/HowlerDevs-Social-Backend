@@ -1,31 +1,46 @@
 from django.urls import path
 from .views import (
     UserPostListAPIView,
-    UserReelListAPIView,
-    SearchPostsAPIView,
-    SearchReelsAPIView,
-    CreateReelAPIView,
+    UserMediaListAPIView,
+    UserContentListAPIView,
     CreatePostAPIView,
-    UpdateDeleteReelAPIView,
+    CreateMediaContentAPIView,
     UpdateDeletePostAPIView,
-    RecommendPostAPIView,
-    ExplorePostsAPIView,
-    ExploreReelsAPIView,
+    UpdateDeleteMediaAPIView,
+    ContentSearchAPIView,
+    HashtagSearchPostsAPIView,
+    HashtagSearchMediaContentsAPIView,
 )
 
 urlpatterns = [
     path("user/posts/<str:username>/", UserPostListAPIView.as_view(), name="user-post"),
-    path("user/reels/<str:username>/", UserReelListAPIView.as_view(), name="user-reel"),
+    path(
+        "user/media/<str:username>/",
+        UserMediaListAPIView.as_view(),
+        name="user-media",
+    ),
+    path("user/contents/<str:username>/", UserContentListAPIView.as_view(), name="user-content"),
     path("post/", CreatePostAPIView.as_view(), name="create-post"),
-    path("reel/", CreateReelAPIView.as_view(), name="create-reel"),
+    path("media/", CreateMediaContentAPIView.as_view(), name="create-media"),
     path(
         "post/<int:pk>/", UpdateDeletePostAPIView.as_view(), name="update-delete-post"
     ),
     path(
-        "reel/<int:pk>/", UpdateDeleteReelAPIView.as_view(), name="update-delete-reel"
+        "media/<int:pk>/",
+        UpdateDeleteMediaAPIView.as_view(),
+        name="update-delete-media",
     ),
-    path("posts/search/", SearchPostsAPIView.as_view(), name="search-post"),
-    path("reels/search/", SearchReelsAPIView.as_view(), name="search-reel"),
+    path("search/", ContentSearchAPIView.as_view(), name="content-search"),
+    path(
+        "posts/search/hashtag/",
+        HashtagSearchPostsAPIView.as_view(),
+        name="hashtag-search-post",
+    ),
+    path(
+        "media_content/search/hashtag/",
+        HashtagSearchMediaContentsAPIView.as_view(),
+        name="hashtag-search-media",
+    ),
     # path("posts/recommend/", RecommendPostAPIView.as_view(), name="recommend-post"),
     # path("posts/explore/", ExplorePostsAPIView.as_view(), name="explore-post"),
     # path("reels/explore/", ExploreReelsAPIView.as_view(), name="explore-reel"),
@@ -33,4 +48,4 @@ urlpatterns = [
     # path("reels/like/", ExploreReelsAPIView.as_view(), name="explore-reel"),
     # path("post/unlike/", ExploreReelsAPIView.as_view(), name="explore-reel"),
     # path("reels/unlike/", ExploreReelsAPIView.as_view(), name="explore-reel"),
-] # TODO add endpoint search on description
+]

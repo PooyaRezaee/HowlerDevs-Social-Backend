@@ -30,3 +30,5 @@ docker exec -it web_application python manage.py createsuperuser
 ```bash
 docker exec -it django-social-db-1 psql -U user -d social
 ```
+
+# Need postgres command: CREATE EXTENSION pg_trgm;

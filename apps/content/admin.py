@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Reel, Post
+from .models import MediaContent, Post
 
 
-@admin.register(Reel)
-class ReelAdmin(admin.ModelAdmin):
+@admin.register(MediaContent)
+class MediaAdmin(admin.ModelAdmin):
     exclude = ["likes"]
 
 

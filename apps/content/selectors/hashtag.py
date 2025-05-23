@@ -1,28 +1,28 @@
-from ..models import Hashtag, Post, Reel
+from typing import Optional
+from django.db.models import QuerySet
+from ..models import Hashtag, Content, Post, MediaContent
 
 
 def get_hashtag_by_name(name: str) -> Hashtag | None:
     return Hashtag.objects.filter(name=name).first()
 
 
-def get_posts_by_hashtag(hashtag_name: str) -> Post | None:
+def get_posts_by_hashtag(hashtag_name: str) -> QuerySet | None:
     hashtag = get_hashtag_by_name(hashtag_name)
     if hashtag:
-        return hashtag.posts.all()
+        return Post.objects.filter(id__in=hashtag.contents.values_list('id', flat=True))
     return None
 
 
-def get_reels_by_hashtag(hashtag_name: str) -> Reel | None:
+def get_media_contents_by_hashtag(hashtag_name: str) -> QuerySet | None:
     hashtag = get_hashtag_by_name(hashtag_name)
     if hashtag:
-        return hashtag.reels.all()
+        return MediaContent.objects.filter(id__in=hashtag.contents.values_list('id', flat=True))
     return None
 
 
-def get_content_by_hashtag(hashtag_name: str) -> dict[str, Post | Reel] | None:
+def get_contents_by_hashtag(hashtag_name: str) -> QuerySet | None:
     hashtag = get_hashtag_by_name(hashtag_name)
     if hashtag:
-        posts = hashtag.posts.all()
-        reels = hashtag.reels.all()
-        return {"posts": posts, "reels": reels}
+        return Content.objects.filter(id__in=hashtag.contents.values_list('id', flat=True))
     return None

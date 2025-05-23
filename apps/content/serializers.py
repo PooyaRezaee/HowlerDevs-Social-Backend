@@ -1,34 +1,45 @@
+import os
 from rest_framework import serializers
-from .models import Post, Reel
+from .models import Post, MediaContent, Content
 
 
-class ContentOutPutSerializer(serializers.ModelSerializer):
+class ContentOutputSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source="owner.username")
+
+    class Meta:
+        model = Content
+        fields = ("id", "description", "user", "thumbnail")
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
+        if isinstance(instance, Post) or hasattr(instance, "post"):
+            data["content_type"] = "post"
+        elif isinstance(instance, MediaContent) or hasattr(instance, "mediacontent"):
+            data["content_type"] = "media"
+        else:
+            data["content_type"] = "unknown"
         data["count_likes"] = instance.likes.count()
         data["created_at"] = instance.created_at.timestamp()
 
         return data
 
 
-class PostOutPutSerializer(ContentOutPutSerializer):
+class PostOutputSerializer(ContentOutputSerializer):
     class Meta:
         model = Post
         fields = ("id", "description", "user", "thumbnail")
 
 
-class ReelOutPutSerializer(ContentOutPutSerializer):
+class MediaContentOutputSerializer(ContentOutputSerializer):
     class Meta:
-        model = Reel
+        model = MediaContent
         fields = (
             "id",
             "description",
             "user",
             "thumbnail",
-            "video",
-            "sound",
+            "media_type",
+            "file",
         )
 
 
@@ -42,27 +53,35 @@ class PostInputSerializer(ContentInputSerializer):
         fields = ("description", "thumbnail")
 
 
-class ReelInputSerializer(ContentInputSerializer):
+class MediaContentInputSerializer(ContentInputSerializer):
     """
-    create reels
+    Create media content
     """
     class Meta:
-        model = Reel
-        fields = ("description", "thumbnail", "video" ,"sound")
+        model = MediaContent
+        fields = ("description", "thumbnail", "file", "media_type")
 
-    
     def validate(self, attrs):
-        video = attrs.get("video")
-        sound = attrs.get("sound")
+        file = attrs.get("file")
+        media_type = attrs.get("media_type")
 
-        if video and sound:
-            raise serializers.ValidationError("Only one of video or sound can be provided.")
+        if not file or not media_type:
+            raise serializers.ValidationError("Both 'file' and 'media_type' are required.")
 
-        if not video and not sound:
-            raise serializers.ValidationError("Either video or sound must be provided.")
+        valid_media_types = ["video", "audio"]
+        if media_type not in valid_media_types:
+            raise serializers.ValidationError({"media_type": "Invalid media_type. Must be 'video' or 'audio'."})
+
+        ext = os.path.splitext(file.name)[1].lower()
+        video_exts = [".mp4", ".mkv", ".avi", ".mov"]
+        audio_exts = [".mp3", ".wav", ".aac", ".ogg"]
+
+        if media_type == "video" and ext not in video_exts:
+            raise serializers.ValidationError({"file": f"File extension {ext} is not valid for video."})
+        if media_type == "audio" and ext not in audio_exts:
+            raise serializers.ValidationError({"file": f"File extension {ext} is not valid for audio."})
 
         return attrs
-
-
+    
 class ContentUpdateInputSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=512)
