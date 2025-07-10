@@ -11,6 +11,8 @@ from .validators import validate_password
 
 
 class RegisterAPIView(APIView):
+    authentication_classes = []
+
     class InputRegisterSerializer(serializers.Serializer):
         username = serializers.CharField(max_length=150)
         password = serializers.CharField(validators=[validate_password])

@@ -24,5 +24,7 @@ SPECTACULAR_SETTINGS = {
     "PREPROCESSING_HOOKS": [
         "config.settings.other.spectacular.preprocessing_filter_spec"
     ],
-    "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
 }

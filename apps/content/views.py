@@ -4,9 +4,13 @@ from drf_spectacular.utils import (
     OpenApiResponse,
     OpenApiParameter,
 )
-from core.output_serializers import SuccessResponseSerializer
-from .models import Post, MediaContent,Content
-from .base_view import UserContentListAPIView,CreateContentAPIView,UpdateDeleteContentAPIView,SearchContentAPIView
+from .models import Post, MediaContent, Content
+from .base_view import (
+    UserContentListAPIView,
+    CreateContentAPIView,
+    UpdateDeleteContentAPIView,
+    SearchContentAPIView,
+)
 from .serializers import (
     PostInputSerializer,
     PostOutputSerializer,
@@ -14,17 +18,14 @@ from .serializers import (
     MediaContentOutputSerializer,
     PostInputSerializer,
     ContentUpdateInputSerializer,
-    ContentOutputSerializer
+    ContentOutputSerializer,
 )
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from apps.content.selectors.search import search_contents
-
-
-
-# Separate post and media content view
 
 
 @extend_schema_view(
@@ -35,6 +36,7 @@ from apps.content.selectors.search import search_contents
 class UserPostListAPIView(UserContentListAPIView):
     model = Post
     serializer_class = PostOutputSerializer
+    authentication_classes = []
 
 
 @extend_schema_view(
@@ -45,16 +47,19 @@ class UserPostListAPIView(UserContentListAPIView):
 class UserMediaListAPIView(UserContentListAPIView):
     model = MediaContent
     serializer_class = MediaContentOutputSerializer
+    authentication_classes = []
+
 
 @extend_schema_view(
     get=extend_schema(
         summary="get user's all content",
-        description="In the case of capturing all user content, there is less detail in the response."
+        description="In the case of capturing all user content, there is less detail in the response.",
     )
 )
 class UserContentListAPIView(UserContentListAPIView):
     model = Content
     serializer_class = ContentOutputSerializer
+    authentication_classes = []
 
 
 @extend_schema_view(
@@ -68,10 +73,12 @@ class CreatePostAPIView(CreateContentAPIView):
     model = Post
     input_serializer_class = PostInputSerializer
     output_serializer_class = PostOutputSerializer
+    authentication_classes = []
 
 
 @extend_schema_view(
     post=extend_schema(
+        description="media_type must be video or audio",
         summary="create a media content",
         request=MediaContentInputSerializer,
         responses={200: MediaContentOutputSerializer},
@@ -145,6 +152,7 @@ class UpdateDeleteMediaAPIView(UpdateDeleteContentAPIView):
 class HashtagSearchPostsAPIView(SearchContentAPIView):
     model = Post
     serializer_class = PostOutputSerializer
+    authentication_classes = []
 
 
 @extend_schema_view(
@@ -158,23 +166,69 @@ class HashtagSearchPostsAPIView(SearchContentAPIView):
         ],
         responses={
             200: OpenApiResponse(
-                response=MediaContentOutputSerializer, description="List of media contents found"
+                response=MediaContentOutputSerializer,
+                description="List of media contents found",
             ),
-            204: OpenApiResponse(description="No media contents found for the provided hashtag"),
+            204: OpenApiResponse(
+                description="No media contents found for the provided hashtag"
+            ),
         },
     )
 )
 class HashtagSearchMediaContentsAPIView(SearchContentAPIView):
+    authentication_classes = []
+
     model = MediaContent
     serializer_class = MediaContentOutputSerializer
 
 
-
+@extend_schema_view(
+    get=extend_schema(
+        summary="Search contents",
+        description="Search for contents (posts or media) using query string, type, and hashtag filters.",
+        parameters=[
+            OpenApiParameter(
+                name="q",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="The search query string",
+            ),
+            OpenApiParameter(
+                name="type",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Content type to search for: 'post', 'media', or omit for all types",
+            ),
+            OpenApiParameter(
+                name="hashtag",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filter contents by a specific hashtag",
+            ),
+        ],
+        responses={
+            200: OpenApiResponse(
+                response=ContentOutputSerializer,
+                description="List of matching contents",
+            ),
+            204: OpenApiResponse(description="No content found matching the criteria"),
+        },
+    )
+)
 class ContentSearchAPIView(APIView):
+    authentication_classes = []
+
     def get(self, request):
         query = request.query_params.get("q")
         content_type = request.query_params.get("type")  # post | media | None
         hashtag = request.query_params.get("hashtag")
-        queryset = search_contents(query=query, content_type=content_type, hashtag=hashtag)
+        queryset = search_contents(
+            query=query, content_type=content_type, hashtag=hashtag
+        )
 
-        return Response(ContentOutputSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
+        return Response(
+            ContentOutputSerializer(queryset, many=True).data, status=status.HTTP_200_OK
+        )

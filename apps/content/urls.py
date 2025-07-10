@@ -32,12 +32,12 @@ urlpatterns = [
     ),
     path("search/", ContentSearchAPIView.as_view(), name="content-search"),
     path(
-        "posts/search/hashtag/",
+        "post/search/hashtag/",
         HashtagSearchPostsAPIView.as_view(),
         name="hashtag-search-post",
     ),
     path(
-        "media_content/search/hashtag/",
+        "media/search/hashtag/",
         HashtagSearchMediaContentsAPIView.as_view(),
         name="hashtag-search-media",
     ),
