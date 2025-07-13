@@ -36,3 +36,11 @@ def user_connected_to(user1: User, user2: User) -> bool:
         Q(requester=user1, receiver=user2) | Q(requester=user2, receiver=user1),
         is_accept=True,
     ).exists()
+
+
+def count_connections(user: User) -> int:
+    return (
+        Connection.objects.accepted()
+        .filter(Q(requester=user) | Q(receiver=user))
+        .count()
+    )

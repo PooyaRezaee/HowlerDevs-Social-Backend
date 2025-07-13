@@ -29,3 +29,7 @@ def get_content_by_owner(username: str) -> list[Content]:
 def get_connection_content(user: User):
     connected_users = list_connections(user)
     return Content.objects.filter(owner_in=connected_users).order_by("-created_at").select_related("post","mediacontent") # TODO check select realted
+
+
+def get_contents_by_owner(username: str):
+    return Content.objects.filter(owner__username=username)

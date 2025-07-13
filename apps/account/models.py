@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_index=True,
     )
     full_name = models.CharField(max_length=64, null=True)
+    email = models.EmailField(null=True, blank=True) # optional: for use reset password or 2fa needed
     bio = models.CharField(max_length=512, null=True, blank=True)
     is_private = models.BooleanField(default=False, db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)
@@ -53,11 +54,23 @@ class User(AbstractBaseUser, PermissionsMixin):
         "Image Profile", upload_to="img/profile", null=True, blank=True
     )
 
+
+    totp_secret = models.CharField(max_length=32, blank=True, null=True)
+    is_2fa_enabled = models.BooleanField(default=False)
+
+    
     objects = UserManager()
 
     class Meta:
         verbose_name = _("user")
         verbose_name_plural = _("users")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["email"],
+                condition=models.Q(email__isnull=False),
+                name="unique_email_if_provided",
+            )
+        ]
 
     USERNAME_FIELD = "username"
 
