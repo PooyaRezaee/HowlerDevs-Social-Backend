@@ -6,6 +6,7 @@ from .views import (
     ConnectionListAPIView,
     RequestConnectionListSentAPIView,
     RequestConnectionListReceivedAPIView,
+    ConnectionRemoveAPIView,
 )
 
 
@@ -14,6 +15,7 @@ urlpatterns = [
     path("accept/", AcceptConnectionAPIView.as_view(), name="request-accept"),
     path("reject/", RejectConnectionAPIView.as_view(), name="request-reject"),
     path("list/", ConnectionListAPIView.as_view(), name="list"),
+    path("remove/", ConnectionRemoveAPIView.as_view(), name="remove"),
     path(
         "request/sent/", RequestConnectionListSentAPIView.as_view(), name="request-sent"
     ),

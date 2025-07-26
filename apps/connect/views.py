@@ -1,15 +1,17 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import serializers, status
-from drf_spectacular.utils import extend_schema, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse
 from core.output_serializers import SuccessResponseSerializer, ErrorResponseSerializer
 from apps.account.models import User
 from .services.connection import (
     request_connection,
     reject_connection,
     accept_connection,
+    remove_connection,
 )
 from .selectors.connection import (
     list_connection_user_received_request,
@@ -28,6 +30,7 @@ class ConnectToUserAPIView(APIView):
         username = serializers.CharField(max_length=150)
 
     @extend_schema(
+        summary="Request connection to user",
         request=InputReqConnectionSerializer,
         responses={
             200: SuccessResponseSerializer,
@@ -82,6 +85,7 @@ class AcceptConnectionAPIView(APIView):
         username = serializers.CharField(max_length=150)
 
     @extend_schema(
+        summary="Accept connection request",
         request=InputAcpConnectionSerializer,
         responses={
             200: SuccessResponseSerializer,
@@ -128,6 +132,7 @@ class RejectConnectionAPIView(APIView):
         username = serializers.CharField(max_length=150)
 
     @extend_schema(
+        summary="Reject connection request",
         request=InputRejConnectionSerializer,
         responses={
             200: SuccessResponseSerializer,
@@ -167,9 +172,6 @@ class RejectConnectionAPIView(APIView):
             )
 
 
-"""TODO Control permisions """
-
-
 class ConnectionListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -182,6 +184,7 @@ class ConnectionListAPIView(APIView):
             fields = ("username", "picture")
 
     @extend_schema(
+        summary="List connections",
         request=ConnectionsInputSerializer,
         responses={
             200: ConnectionsOutPutSerializer,
@@ -217,6 +220,7 @@ class ConnectionListAPIView(APIView):
 
 class RequestConnectionListReceivedAPIView(APIView):
     """Return a list of incoming connection requests waiting for the authenticated user's approval."""
+
     permission_classes = [IsAuthenticated]
 
     class ReceivedConnectionsOutPutSerializer(serializers.ModelSerializer):
@@ -225,6 +229,7 @@ class RequestConnectionListReceivedAPIView(APIView):
             fields = ("username", "picture")
 
     @extend_schema(
+        summary="List received connection requests",
         responses={
             200: ReceivedConnectionsOutPutSerializer,
             400: ErrorResponseSerializer,
@@ -242,6 +247,7 @@ class RequestConnectionListReceivedAPIView(APIView):
 
 class RequestConnectionListSentAPIView(APIView):
     """Return a list pending connection rqeuests sent by the authenticated user."""
+
     permission_classes = [IsAuthenticated]
 
     class SentConnectionsOutPutSerializer(serializers.ModelSerializer):
@@ -250,6 +256,7 @@ class RequestConnectionListSentAPIView(APIView):
             fields = ("username", "picture")
 
     @extend_schema(
+        summary="List sent connection requests",
         responses={
             200: SentConnectionsOutPutSerializer,
             400: ErrorResponseSerializer,
@@ -263,3 +270,36 @@ class RequestConnectionListSentAPIView(APIView):
         )
         # TODO need pagination
         return Response(srz.data)
+
+
+class ConnectionRemoveAPIView(APIView):
+    """Remove an existing connection between you and another user."""
+    permission_classes = [IsAuthenticated]
+
+    class ConnectionRemoveOutputSerializer(serializers.Serializer):
+        username = serializers.CharField()
+
+    @extend_schema(
+        summary="Remove connection",
+        request=ConnectionRemoveOutputSerializer,
+        responses={
+            204: OpenApiResponse(description="Connection successfully removed."),
+            400: OpenApiResponse(description="Connection does not exist."),
+            404: OpenApiResponse(description="Target user not found."),
+        }
+    )
+    def post(self, request):
+        self.srz = self.ConnectionRemoveOutputSerializer(data=request.data)
+        self.srz.is_valid(raise_exception=True)
+
+        username = self.srz.validated_data["username"]
+        requester = request.user
+        receiver = get_object_or_404(User, username=username)
+
+        if remove_connection(requester, receiver):
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {"detail": "Connection does not exist."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )

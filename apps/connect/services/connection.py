@@ -1,4 +1,4 @@
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from apps.account.models import User
 from ..models import Connection
@@ -13,61 +13,72 @@ class ErrorMessages:
 def request_connection(
     requester: User, receiver: User
 ) -> tuple[bool, str | Connection]:
-
-    accept = not receiver.is_private
-    connection = Connection.objects.filter(requester=requester, receiver=receiver)
-    reverse_connection = Connection.objects.filter(
-        requester=receiver, receiver=requester
-    )
+    """Request a connection between two users."""
+    
     if requester.pk == receiver.pk:
         return False, ErrorMessages.cannot_connect_to_self
 
-    if connection.exists():
-        if connection.get().is_accept:
-            return False, ErrorMessages.connection_exist
-        else:
-            return False, ErrorMessages.request_connection_exist
+    existing = Connection.objects.filter(
+        requester=requester, receiver=receiver
+    ).first()
 
-    if reverse_connection.exists():
-        obj_reverse_connection = reverse_connection.get()
-        if obj_reverse_connection.is_accept:
+    if existing:
+        if existing.is_accept:
             return False, ErrorMessages.connection_exist
-        else:
-            obj_reverse_connection.is_accept = True
-            obj_reverse_connection.save()
-            return True, obj_reverse_connection
+        return False, ErrorMessages.request_connection_exist
+
+    reverse = Connection.objects.filter(
+        requester=receiver, receiver=requester
+    ).first()
+
+    if reverse:
+        if reverse.is_accept:
+            return False, ErrorMessages.connection_exist
+        reverse.is_accept = True
+        reverse.save()
+        return True, reverse
+
     try:
         connection = Connection.objects.create(
             requester=requester,
             receiver=receiver,
-            is_accept=accept,
+            is_accept=not receiver.is_private,
         )
-
         return True, connection
     except ValidationError as e:
         return False, str(e)
 
 
 def reject_connection(requester: User, receiver: User) -> bool:
-    try:
-        connection = Connection.objects.pending().get(
-            requester=requester, receiver=receiver
-        )
-        connection.delete()
-
-        return True
-    except ObjectDoesNotExist:
+    """Reject a connection request."""
+    connection = Connection.objects.pending().filter(
+        requester=requester, receiver=receiver
+    ).first()
+    if not connection:
         return False
+    connection.delete()
+    return True
 
 
 def accept_connection(requester: User, receiver: User) -> bool:
-    try:
-        connection = Connection.objects.pending().get(
-            requester=requester, receiver=receiver
-        )
-        connection.is_accept = True
-        connection.save()
+    """Accept a connection request."""
+    connection = Connection.objects.pending().filter(
+        requester=requester, receiver=receiver
+    ).first()
+    if not connection:
+        return False
+    connection.is_accept = True
+    connection.save()
+    return True
 
-        return True
-    except ObjectDoesNotExist:
+
+def remove_connection(requester: User, receiver: User) -> bool:
+    """Remove any connection between two users (accepted or not)."""
+    try:
+        connection = Connection.objects.between(requester, receiver).first()
+        if connection:
+            connection.delete()
+            return True
+        return False
+    except IntegrityError:
         return False
