@@ -36,6 +36,7 @@ LOCAL_APPS = [
     "apps.api.apps.ApiConfig",
     "apps.connect.apps.ConnectConfig",
     "apps.content.apps.ContentConfig",
+    "apps.comment.apps.CommentConfig",
 ]
 INSTALLED_APPS = [
     "django.contrib.admin",
