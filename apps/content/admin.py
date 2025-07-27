@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import MediaContent, Post, Hashtag, Content
+from .models import MediaContent, Post, Hashtag
 
 
 class BaseContentAdmin(admin.ModelAdmin):

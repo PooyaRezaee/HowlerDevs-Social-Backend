@@ -1,5 +1,5 @@
 from typing import Optional
-from django.db.models import QuerySet
+from django.db.models import QuerySet,Count
 from django.contrib.postgres.search import TrigramSimilarity
 from apps.content.models import Content, Post, MediaContent
 
@@ -20,4 +20,4 @@ def search_contents(query: Optional[str] = None, content_type: Optional[str] = N
                .filter(similarity__gt=0.11)\
                .order_by("-similarity")
 
-    return qs
+    return qs.select_related('owner').prefetch_related('hashtags').annotate(like_count=Count('likes'))

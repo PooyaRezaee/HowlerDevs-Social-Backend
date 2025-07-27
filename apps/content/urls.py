@@ -10,6 +10,10 @@ from .views import (
     ContentSearchAPIView,
     HashtagSearchPostsAPIView,
     HashtagSearchMediaContentsAPIView,
+    ExploreContentAPIView,
+    RecommendContentAPIView,
+    LikeContentAPIView,
+    UnLikeContentAPIView,
 )
 
 urlpatterns = [
@@ -41,11 +45,8 @@ urlpatterns = [
         HashtagSearchMediaContentsAPIView.as_view(),
         name="hashtag-search-media",
     ),
-    # path("posts/recommend/", RecommendPostAPIView.as_view(), name="recommend-post"),
-    # path("posts/explore/", ExplorePostsAPIView.as_view(), name="explore-post"),
-    # path("reels/explore/", ExploreReelsAPIView.as_view(), name="explore-reel"),
-    # path("post/like/", ExploreReelsAPIView.as_view(), name="explore-reel"),
-    # path("reels/like/", ExploreReelsAPIView.as_view(), name="explore-reel"),
-    # path("post/unlike/", ExploreReelsAPIView.as_view(), name="explore-reel"),
-    # path("reels/unlike/", ExploreReelsAPIView.as_view(), name="explore-reel"),
+    path('posts/explore/', ExploreContentAPIView.as_view(), name='explore-content'),
+    path('posts/recommend/', RecommendContentAPIView.as_view(), name='recommend-content'),
+    path('content/like/', LikeContentAPIView.as_view(), name='content-like'),
+    path('content/unlike/', UnLikeContentAPIView.as_view(), name='content-unlike'),
 ]

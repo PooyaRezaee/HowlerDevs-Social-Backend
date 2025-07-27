@@ -18,7 +18,7 @@ class ContentOutputSerializer(serializers.ModelSerializer):
             data["content_type"] = "media"
         else:
             data["content_type"] = "unknown"
-        data["count_likes"] = instance.likes.count()
+        data["count_likes"] = getattr(instance, "like_count", instance.likes.count())
         data["created_at"] = instance.created_at.timestamp()
 
         return data

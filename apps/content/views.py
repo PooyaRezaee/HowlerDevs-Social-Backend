@@ -1,9 +1,14 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
     OpenApiResponse,
     OpenApiParameter,
 )
+
 from .models import Post, MediaContent, Content
 from .base_view import (
     UserContentListAPIView,
@@ -16,16 +21,12 @@ from .serializers import (
     PostOutputSerializer,
     MediaContentInputSerializer,
     MediaContentOutputSerializer,
-    PostInputSerializer,
     ContentUpdateInputSerializer,
     ContentOutputSerializer,
 )
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny
-from apps.content.selectors.search import search_contents
+from .selectors.search import search_contents
+from .selectors.explore import explore_content, recommend_content
+from .services.like import like_content, unlike_content
 
 
 @extend_schema_view(
@@ -73,7 +74,6 @@ class CreatePostAPIView(CreateContentAPIView):
     model = Post
     input_serializer_class = PostInputSerializer
     output_serializer_class = PostOutputSerializer
-    authentication_classes = []
 
 
 @extend_schema_view(
@@ -232,3 +232,73 @@ class ContentSearchAPIView(APIView):
         return Response(
             ContentOutputSerializer(queryset, many=True).data, status=status.HTTP_200_OK
         )
+
+
+class ExploreContentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Explore personalized content",
+        description="Return a mixed list of trending and related contents for the authenticated user.",
+        responses={200: ContentOutputSerializer(many=True)}
+    )
+    def get(self, request):
+        results = explore_content(request.user)
+        serializer = ContentOutputSerializer(results, many=True)
+        return Response(serializer.data)
+
+
+class RecommendContentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Recommend content from connections",
+        description="Return the most recent posts by a user's accepted connections.",
+        responses={200: ContentOutputSerializer(many=True)}
+    )
+    def get(self, request):
+        results = recommend_content(request.user)
+        serializer = ContentOutputSerializer(results, many=True)
+        return Response(serializer.data)
+
+
+class LikeContentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Like a content",
+        request=None,
+        parameters=[OpenApiParameter(
+            name='content_id',
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description='ID of the content to like',
+            required=True
+        )],
+        responses={204: OpenApiResponse(description='No Content')}
+    )
+    def post(self, request):
+        cid = request.query_params.get('content_id')
+        like_content(request.user, cid)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UnLikeContentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Unlike a content",
+        request=None,
+        parameters=[OpenApiParameter(
+            name='content_id',
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description='ID of the content to unlike',
+            required=True
+        )],
+        responses={204: OpenApiResponse(description='No Content')}
+    )
+    def post(self, request):
+        cid = request.query_params.get('content_id')
+        unlike_content(request.user, cid)
+        return Response(status=status.HTTP_204_NO_CONTENT)
