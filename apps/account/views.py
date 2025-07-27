@@ -70,9 +70,14 @@ class RegisterAPIView(APIView):
             username = srz.validated_data["username"]
             password = srz.validated_data["password"]
             user = create_user(username, password)
-            return Response(
-                self.OutputRegisterSerializer(user).data, status=status.HTTP_201_CREATED
-            )
+            if user:
+                return Response(
+                    self.OutputRegisterSerializer(user).data, status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    {"detail": "username taken by another one"}, status=status.HTTP_409_CONFLICT # TODO standard
+                )
         except Exception as e:
             logger.error(f"Error in register user {e}")
             return Response(
